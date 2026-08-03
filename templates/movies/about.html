@@ -3,14 +3,15 @@
 {% block title %}About — Random Movie{% endblock title %}
 
 {% block content %}
-<div class="bg-white p-4 rounded-3 shadow-sm">
+<div class="ticket-card">
+  <span class="hero__eyebrow">The story</span>
   <h1>About Random Movie</h1>
-  <p class="lead">This web application is built with Django to help you choose what to watch.</p>
-  <p>Here we will implement:</p>
-  <ul>
-    <li>User registration and authentication</li>
-    <li>Movie database with poster image uploads</li>
-    <li>Random movie generation for viewing</li>
+  <p class="lead">This web application is built with Django to help you choose what to watch — because the hardest part of movie night shouldn't be picking the movie.</p>
+  <p style="color: var(--muted); font-weight: 600;">Here's what we're building:</p>
+  <ul class="playful-list">
+    <li>🔐 User registration and authentication</li>
+    <li>🎞️ Movie database with poster image uploads</li>
+    <li>🎲 Random movie generation for viewing</li>
   </ul>
 </div>
 {% endblock content %}

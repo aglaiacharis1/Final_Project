@@ -8,4 +8,24 @@
   <p class="lead text-muted">Trust our service and pick a random movie from the database!</p>
   <a href="#" class="btn btn-primary btn-lg px-4 gap-3">🎲 Pick a Random Movie</a>
 </div>
+
+<h2 class="mb-4">All Movies in Database:</h2>
+<div class="row">
+  {% for movie in movies %}
+    <div class="col-md-4 mb-3">
+      <div class="card h-100 shadow-sm">
+        {% if movie.poster %}
+          <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 300px; object-fit: cover;">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ movie.title }} ({{ movie.release_year }})</h5>
+          <p class="card-text text-muted">{{ movie.description|truncatechars:100 }}</p>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <p class="text-muted">No movies added yet. Go to admin panel to add some!</p>
+  {% endfor %}
+</div>
+
 {% endblock content %}
