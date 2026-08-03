@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ movie.Title|default:"Movie" }} — Movie Mood{% endblock title %}
+
+{% block content %}
+{% if movie.Response == "True" %}
+  <div class="movie-reveal ticket-card">
+    {% if movie.Poster and movie.Poster != "N/A" %}
+      <img src="{{ movie.Poster }}" alt="{{ movie.Title }} poster" class="movie-reveal__poster">
+    {% endif %}
+    <div class="movie-reveal__details">
+      <span class="hero__eyebrow">📋 Movie details</span>
+      <h2>{{ movie.Title }} ({{ movie.Year }})</h2>
+      {% if movie.imdbRating and movie.imdbRating != "N/A" %}
+        <span class="badge badge-rating">⭐ {{ movie.imdbRating }} / 10</span>
+      {% endif %}
+      <p><strong>Genre:</strong> {{ movie.Genre }}</p>
+      <p><strong>Director:</strong> {{ movie.Director }}</p>
+      <p><strong>Actors:</strong> {{ movie.Actors }}</p>
+      <p><strong>Runtime:</strong> {{ movie.Runtime }}</p>
+      <p style="color: var(--muted);"><strong style="color: var(--ink);">Plot:</strong> {{ movie.Plot }}</p>
+
+      <div class="movie-card__actions">
+        {% if trailer_url %}
+          <a href="{{ trailer_url }}" target="_blank" rel="noopener" class="btn-pill btn-pill--sm">▶ Watch Trailer</a>
+        {% endif %}
+        {% if is_favorite %}
+          <span class="btn-pill btn-pill--sm" style="background: var(--mint);">In favorites ✓</span>
+        {% elif user.is_authenticated %}
+          <form method="post" action="{% url 'add_favorite' movie.imdbID %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'movie_detail' movie.imdbID %}">
+            <button type="submit" class="btn-pill btn-pill--sm btn-pill--violet">Add to Favorites ❤️</button>
+          </form>
+        {% endif %}
+        <a href="javascript:history.back()" class="btn-pill btn-pill--sm btn-pill--outline" style="color: var(--ink); border-color: var(--ink);">← Back</a>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="ticket-card">
+    <h2>Movie not found</h2>
+    <p style="color: var(--muted);">{{ movie.Error|default:"We couldn't load details for this title." }}</p>
+    <a href="{% url 'home' %}" class="btn-pill">Back to Home</a>
+  </div>
+{% endif %}
+{% endblock content %}

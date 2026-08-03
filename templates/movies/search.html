@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Search — Movie Mood{% endblock title %}
+
+{% block content %}
+<div class="ticket-card">
+  <span class="hero__eyebrow">🔍 Find something specific</span>
+  <h1>Search & Add</h1>
+
+  <form method="get" class="search-bar">
+    <input type="text" name="q" placeholder="Enter a movie name…" value="{{ query }}">
+    <button type="submit" class="btn-pill btn-pill--primary">Search</button>
+  </form>
+
+  {% if error %}
+    <p class="flash flash--warning">{{ error }}</p>
+  {% endif %}
+
+  {% if results %}
+    <div class="movie-grid">
+      {% for movie in results %}
+        <div class="movie-card">
+          {% if movie.Poster and movie.Poster != "N/A" %}
+            <img src="{{ movie.Poster }}" alt="{{ movie.Title }} poster" class="movie-card__poster">
+          {% endif %}
+          <div class="movie-card__body">
+            <h3>{{ movie.Title }}</h3>
+            <span style="color: var(--muted); font-weight: 600;">{{ movie.Year }}</span>
+            <div class="movie-card__actions">
+              <a href="{% url 'movie_detail' movie.imdbID %}" class="btn-pill btn-pill--sm">Details</a>
+              {% if movie.imdbID in favorite_ids %}
+                <span class="btn-pill btn-pill--sm" style="background: var(--mint);">In favorites ✓</span>
+              {% elif user.is_authenticated %}
+                <form method="post" action="{% url 'add_favorite' movie.imdbID %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{% url 'search' %}?q={{ query }}&page={{ page }}">
+                  <button type="submit" class="btn-pill btn-pill--sm btn-pill--violet">Add ❤️</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+      <div class="pagination-row">
+        {% if page > 1 %}
+          <a href="?q={{ query }}&page={{ page|add:'-1' }}" class="btn-pill btn-pill--sm">← Prev</a>
+        {% endif %}
+        <span style="align-self: center; font-weight: 700;">Page {{ page }} of {{ total_pages }}</span>
+        {% if page < total_pages %}
+          <a href="?q={{ query }}&page={{ page|add:'1' }}" class="btn-pill btn-pill--sm">Next →</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% elif query %}
+    <p style="color: var(--muted);">No results yet — try a different title.</p>
+  {% endif %}
+</div>
+{% endblock content %}

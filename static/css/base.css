@@ -369,3 +369,163 @@ a { color: var(--violet); }
 @media (max-width: 640px) {
   .movie-reveal { flex-direction: column; text-align: center; }
 }
+
+/* ---------- Flash messages ---------- */
+.flash-stack { display: grid; gap: 0.6rem; margin-bottom: 1.5rem; }
+
+.flash {
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1.1rem;
+  font-weight: 600;
+  background: #fff;
+}
+.flash--success { background: var(--mint); }
+.flash--warning { background: var(--sunshine); }
+.flash--error, .flash--danger { background: var(--hot-pink); color: #fff; }
+
+/* ---------- Mood badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 2px solid var(--ink);
+}
+.badge-comedy  { background: var(--sunshine); color: var(--ink); }
+.badge-horror  { background: var(--hot-pink); color: #fff; }
+.badge-drama   { background: var(--violet); color: #fff; }
+.badge-action  { background: var(--mint); color: var(--ink); }
+.badge-fantasy { background: #C9B8FF; color: var(--ink); }
+.badge-romance { background: #FFB3C6; color: var(--ink); }
+.badge-rating  { background: var(--sunshine); color: var(--ink); border-radius: 10px; padding: 0.25rem 0.7rem; }
+
+/* ---------- Mood picker (radio "pills") ---------- */
+.mood-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.mood-option { position: relative; }
+.mood-option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.mood-option label {
+  display: block;
+  text-align: center;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 0.9rem 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.mood-option input:checked + label {
+  background: var(--sunshine);
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-md);
+}
+.mood-option input:focus-visible + label { outline: 3px solid var(--mint); outline-offset: 2px; }
+
+/* ---------- Filter row (year / rating) ---------- */
+.filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.filter-field label {
+  font-family: var(--font-display);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.filter-field input[type="range"] {
+  width: 100%;
+  accent-color: var(--violet);
+}
+.filter-field .filter-value {
+  font-weight: 700;
+  color: var(--violet);
+  font-family: var(--font-display);
+}
+@media (max-width: 640px) {
+  .filter-row { grid-template-columns: 1fr; }
+}
+
+/* ---------- Search input ---------- */
+.search-bar {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+.search-bar input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  padding: 0.7rem 1rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+}
+.search-bar input[type="text"]:focus {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.25);
+  outline: none;
+}
+
+/* ---------- Movie grid & card ---------- */
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.movie-card {
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.movie-card__poster {
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  border-bottom: 3px solid var(--ink);
+  background: var(--cream);
+}
+
+.movie-card__body { padding: 1rem; display: flex; flex-direction: column; gap: 0.6rem; flex: 1; }
+.movie-card__body h3 { font-size: 1.05rem; margin: 0; }
+.movie-card__actions { display: flex; gap: 0.5rem; margin-top: auto; flex-wrap: wrap; }
+
+/* ---------- History strip ---------- */
+.history-list { display: grid; gap: 0.6rem; margin-top: 1rem; }
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+}
+
+.seen-caption { color: var(--muted); font-weight: 600; margin-top: 1rem; }
+
+/* ---------- Pagination ---------- */
+.pagination-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}

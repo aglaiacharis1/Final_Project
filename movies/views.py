@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.generic import TemplateView
 
-from .models import Favorite
+from .models import Favorite, Movie
 from .omdb import get_details, search_by_genre_year, search_movies
 
 # key -> (label, OMDb genre keyword, badge css class)
@@ -107,15 +107,20 @@ def home(request):
 
 def search(request):
     query = request.GET.get("q", "").strip()
+    page = int(request.GET.get("page", 1))
     results = []
     error = None
+    total_pages = 1
+
     if query:
         if len(query) < 2:
             error = "Please enter at least 2 characters."
         else:
-            data = search_movies(query)
+            data = search_movies(query, page=page)
             if data.get("Response") == "True":
                 results = data["Search"]
+                total_results = int(data.get("totalResults", 0))
+                total_pages = max(1, -(-total_results // 10))  # ceil division
             else:
                 error = "Nothing found."
 
@@ -126,6 +131,8 @@ def search(request):
             "query": query,
             "results": results,
             "error": error,
+            "page": page,
+            "total_pages": total_pages,
             "favorite_ids": _favorite_ids(request.user),
         },
     )
@@ -181,3 +188,9 @@ def remove_favorite(request, pk):
 @login_required
 def favorites(request):
     return render(request, "movies/favorites.html", {"favorites": request.user.favorites.all()})
+
+
+def catalog(request):
+    """Browse movies curated locally via the admin (the Movie model)."""
+    movies = Movie.objects.all().order_by("-release_year")
+    return render(request, "movies/catalog.html", {"movies": movies})

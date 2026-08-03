@@ -11,19 +11,24 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-1#!+el4nd5$a$w_t7=-ekr=0k9)^skjps(rryd)h4ev!qoqt)_"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "django-insecure-1#!+el4nd5$a$w_t7=-ekr=0k9)^skjps(rryd)h4ev!qoqt)_"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -129,3 +134,6 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK ="bootstrap5"
 MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# OMDb API — get a free key at https://www.omdbapi.com/apikey.aspx
+OMDB_API_KEY = os.environ.get("OMDB_API_KEY", "")

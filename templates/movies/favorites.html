@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}My Favorites — Movie Mood{% endblock title %}
+
+{% block content %}
+<div class="ticket-card">
+  <span class="hero__eyebrow">⭐ Your list</span>
+  <h1>My Favorites</h1>
+
+  {% if favorites %}
+    <p style="color: var(--muted); font-weight: 600;">{{ favorites|length }} saved movie{{ favorites|length|pluralize }}</p>
+    <div class="movie-grid">
+      {% for fav in favorites %}
+        <div class="movie-card">
+          {% if fav.poster %}
+            <img src="{{ fav.poster }}" alt="{{ fav.title }} poster" class="movie-card__poster">
+          {% endif %}
+          <div class="movie-card__body">
+            <h3>{{ fav.title }}</h3>
+            <span style="color: var(--muted); font-weight: 600;">{{ fav.year }} · added {{ fav.added|date:"M j, Y" }}</span>
+            <div class="movie-card__actions">
+              <a href="{% url 'movie_detail' fav.imdb_id %}" class="btn-pill btn-pill--sm">Details</a>
+              <form method="post" action="{% url 'remove_favorite' fav.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn-pill btn-pill--sm btn-pill--outline" style="color: var(--ink); border-color: var(--ink);">Remove 🗑️</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p style="color: var(--muted);">No favorites yet. Find movies you love and add them!</p>
+  {% endif %}
+</div>
+{% endblock content %}

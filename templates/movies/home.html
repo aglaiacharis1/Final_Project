@@ -1,31 +1,108 @@
 {% extends 'base.html' %}
 
-{% block title %}Home — Random Movie{% endblock title %}
+{% block title %}Home — Movie Mood{% endblock title %}
 
 {% block content %}
-<div class="p-5 mb-4 bg-white rounded-3 shadow-sm text-center">
-  <h1 class="display-5 fw-bold">Don't know what to watch tonight?</h1>
-  <p class="lead text-muted">Trust our service and pick a random movie from the database!</p>
-  <a href="#" class="btn btn-primary btn-lg px-4 gap-3">🎲 Pick a Random Movie</a>
-</div>
+<div class="ticket-card hero">
+  <span class="hero__eyebrow">🍿 Movie night, solved</span>
+  <h1>What's your mood today?</h1>
+  <p class="lead">Pick a vibe, set your filters, and we'll find a random movie from OMDb that fits.</p>
 
-<h2 class="mb-4">All Movies in Database:</h2>
-<div class="row">
-  {% for movie in movies %}
-    <div class="col-md-4 mb-3">
-      <div class="card h-100 shadow-sm">
-        {% if movie.poster %}
-          <img src="{{ movie.poster.url }}" class="card-img-top" alt="{{ movie.title }}" style="height: 300px; object-fit: cover;">
-        {% endif %}
-        <div class="card-body">
-          <h5 class="card-title">{{ movie.title }} ({{ movie.release_year }})</h5>
-          <p class="card-text text-muted">{{ movie.description|truncatechars:100 }}</p>
+  <form method="post" id="mood-form" style="text-align: left;">
+    {% csrf_token %}
+
+    <div class="mood-grid">
+      {% for key, value in mood_map.items %}
+        {% with label=value.0 %}
+        <div class="mood-option">
+          <input type="radio" id="mood-{{ key }}" name="mood" value="{{ key }}" {% if key == selected_mood %}checked{% endif %}>
+          <label for="mood-{{ key }}">{{ label }}</label>
         </div>
+        {% endwith %}
+      {% endfor %}
+    </div>
+
+    <div class="filter-row">
+      <div class="filter-field">
+        <label for="year_from">Year range: <span class="filter-value" id="year-display">{{ year_from }}–{{ year_to }}</span></label>
+        <input type="range" id="year_from" name="year_from" min="1970" max="2024" value="{{ year_from }}">
+        <input type="range" id="year_to" name="year_to" min="1970" max="2024" value="{{ year_to }}">
+      </div>
+      <div class="filter-field">
+        <label for="min_rating">Min IMDb rating: <span class="filter-value" id="rating-display">{{ min_rating }}</span></label>
+        <input type="range" id="min_rating" name="min_rating" min="0" max="9" step="0.5" value="{{ min_rating }}">
       </div>
     </div>
-  {% empty %}
-    <p class="text-muted">No movies added yet. Go to admin panel to add some!</p>
-  {% endfor %}
+
+    <button type="submit" class="btn-pill btn-pill--primary btn-pill--lg" id="find-btn">
+      <span class="dice-icon">🎲</span> <span id="find-btn-label">Find a Movie</span>
+    </button>
+  </form>
+
+  {% if seen_count > 0 %}
+    <p class="seen-caption">🎬 {{ seen_count }} movie{{ seen_count|pluralize }} shown this session — no repeats!</p>
+  {% endif %}
 </div>
 
+{% if last_found %}
+  <div class="movie-reveal ticket-card" style="margin-top: 2rem;">
+    {% if last_found.Poster and last_found.Poster != "N/A" %}
+      <img src="{{ last_found.Poster }}" alt="{{ last_found.Title }} poster" class="movie-reveal__poster">
+    {% endif %}
+    <div class="movie-reveal__details">
+      <span class="hero__eyebrow">Tonight's pick</span>
+      <h2>{{ last_found.Title }} ({{ last_found.Year }})</h2>
+      {% if last_found.imdbRating %}
+        <span class="badge badge-rating">⭐ {{ last_found.imdbRating }} / 10</span>
+      {% endif %}
+      <div class="movie-card__actions" style="margin-top: 1rem;">
+        <a href="{% url 'movie_detail' last_found.imdbID %}" class="btn-pill btn-pill--sm">View Details</a>
+        {% if last_found.imdbID in favorite_ids %}
+          <span class="btn-pill btn-pill--sm" style="background: var(--mint);">In favorites ✓</span>
+        {% elif user.is_authenticated %}
+          <form method="post" action="{% url 'add_favorite' last_found.imdbID %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{% url 'home' %}">
+            <button type="submit" class="btn-pill btn-pill--sm btn-pill--violet">Add to Favorites ❤️</button>
+          </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% if history %}
+  <div class="ticket-card" style="margin-top: 2rem;">
+    <h3>📜 Session history</h3>
+    <div class="history-list">
+      {% for movie in history %}
+        <div class="history-item">
+          <span>{{ movie.Title }} ({{ movie.Year }})</span>
+          <a href="{% url 'movie_detail' movie.imdbID %}" class="btn-pill btn-pill--sm">Details</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+<script>
+  const yearFrom = document.getElementById('year_from');
+  const yearTo = document.getElementById('year_to');
+  const yearDisplay = document.getElementById('year-display');
+  const rating = document.getElementById('min_rating');
+  const ratingDisplay = document.getElementById('rating-display');
+
+  function updateYearDisplay() {
+    yearDisplay.textContent = yearFrom.value + '–' + yearTo.value;
+  }
+  yearFrom.addEventListener('input', updateYearDisplay);
+  yearTo.addEventListener('input', updateYearDisplay);
+  rating.addEventListener('input', () => { ratingDisplay.textContent = rating.value; });
+
+  document.getElementById('mood-form').addEventListener('submit', function () {
+    const btn = document.getElementById('find-btn');
+    document.getElementById('find-btn-label').textContent = 'Finding something…';
+    btn.disabled = true;
+  });
+</script>
 {% endblock content %}

@@ -1,29 +1,55 @@
-
-from django.test import SimpleTestCase
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from django.urls import reverse
 
-class HomePagesTests(SimpleTestCase):
-    def test_url_exists_at_correct_location(self):
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 200)
+from .models import Favorite, Movie
 
-    def test_home_url_by_name(self):
-        response = self.client.get(reverse('home'))
-        self.assertEqual(response.status_code, 200)
+User = get_user_model()
 
-    def test_template_name_correct(self):
+
+class MoviePagesTests(TestCase):
+    def test_home_page_loads(self):
         response = self.client.get(reverse("home"))
-        self.assertTemplateUsed(response, "movies/home.html")
-
-class AboutPageTests(SimpleTestCase):
-    def test_url_exists_at_correct_location(self):
-        response = self.client.get('/about/')
         self.assertEqual(response.status_code, 200)
 
-    def test_about_url_by_name(self):
-        response = self.client.get(reverse('about'))
+    def test_about_page_loads(self):
+        response = self.client.get(reverse("about"))
         self.assertEqual(response.status_code, 200)
 
-    def test_template_name_correct(self):
-            response = self.client.get(reverse("about"))
-            self.assertTemplateUsed(response, "movies/about.html")
+    def test_catalog_page_loads(self):
+        response = self.client.get(reverse("catalog"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_favorites_requires_login(self):
+        response = self.client.get(reverse("favorites"))
+        self.assertEqual(response.status_code, 302)
+
+    def test_favorites_accessible_when_logged_in(self):
+        User.objects.create_user(username="tester", password="testpass123")
+        self.client.login(username="tester", password="testpass123")
+        response = self.client.get(reverse("favorites"))
+        self.assertEqual(response.status_code, 200)
+
+
+class MovieModelTests(TestCase):
+    def test_movie_str_returns_title(self):
+        movie = Movie.objects.create(
+            title="Inception", description="A dream heist.", release_year=2010
+        )
+        self.assertEqual(str(movie), "Inception")
+
+
+class FavoriteModelTests(TestCase):
+    def test_favorite_str_includes_user(self):
+        user = User.objects.create_user(username="tester", password="testpass123")
+        fav = Favorite.objects.create(
+            user=user, imdb_id="tt1375666", title="Inception", year="2010"
+        )
+        self.assertIn("Inception", str(fav))
+        self.assertIn("tester", str(fav))
+
+    def test_duplicate_favorite_not_allowed(self):
+        user = User.objects.create_user(username="tester", password="testpass123")
+        Favorite.objects.create(user=user, imdb_id="tt1375666", title="Inception")
+        with self.assertRaises(Exception):
+            Favorite.objects.create(user=user, imdb_id="tt1375666", title="Inception")
