@@ -7,9 +7,11 @@
   <span class="hero__eyebrow">🔍 Find something specific</span>
   <h1>Search & Add</h1>
 
-  <form method="get" class="search-bar">
-    <input type="text" name="q" placeholder="Enter a movie name…" value="{{ query }}">
-    <button type="submit" class="btn-pill btn-pill--primary">Search</button>
+  <form method="get" class="search-bar" id="search-form">
+    <input type="text" name="q" placeholder="Enter a movie name…" value="{{ query }}" autofocus>
+    <button type="submit" class="btn-pill btn-pill--primary" id="search-btn">
+      <span id="search-btn-label">Search</span>
+    </button>
   </form>
 
   {% if error %}
@@ -17,11 +19,13 @@
   {% endif %}
 
   {% if results %}
-    <div class="movie-grid">
+    <div class="movie-grid" aria-live="polite">
       {% for movie in results %}
         <div class="movie-card">
           {% if movie.Poster and movie.Poster != "N/A" %}
-            <img src="{{ movie.Poster }}" alt="{{ movie.Title }} poster" class="movie-card__poster">
+            <img src="{{ movie.Poster }}" alt="{{ movie.Title }} poster" class="movie-card__poster" loading="lazy">
+          {% else %}
+            <div class="movie-card__poster poster-placeholder" aria-hidden="true">🎬</div>
           {% endif %}
           <div class="movie-card__body">
             <h3>{{ movie.Title }}</h3>
@@ -33,7 +37,7 @@
               {% elif user.is_authenticated %}
                 <form method="post" action="{% url 'add_favorite' movie.imdbID %}">
                   {% csrf_token %}
-                  <input type="hidden" name="next" value="{% url 'search' %}?q={{ query }}&page={{ page }}">
+                  <input type="hidden" name="next" value="{% url 'search' %}?q={{ query|urlencode }}&page={{ page }}">
                   <button type="submit" class="btn-pill btn-pill--sm btn-pill--violet">Add ❤️</button>
                 </form>
               {% endif %}
@@ -46,11 +50,11 @@
     {% if total_pages > 1 %}
       <div class="pagination-row">
         {% if page > 1 %}
-          <a href="?q={{ query }}&page={{ page|add:'-1' }}" class="btn-pill btn-pill--sm">← Prev</a>
+          <a href="?q={{ query|urlencode }}&page={{ page|add:'-1' }}" class="btn-pill btn-pill--sm">← Prev</a>
         {% endif %}
         <span style="align-self: center; font-weight: 700;">Page {{ page }} of {{ total_pages }}</span>
         {% if page < total_pages %}
-          <a href="?q={{ query }}&page={{ page|add:'1' }}" class="btn-pill btn-pill--sm">Next →</a>
+          <a href="?q={{ query|urlencode }}&page={{ page|add:'1' }}" class="btn-pill btn-pill--sm">Next →</a>
         {% endif %}
       </div>
     {% endif %}
@@ -58,4 +62,12 @@
     <p style="color: var(--muted);">No results yet — try a different title.</p>
   {% endif %}
 </div>
+
+<script>
+  document.getElementById('search-form').addEventListener('submit', function () {
+    const btn = document.getElementById('search-btn');
+    document.getElementById('search-btn-label').textContent = 'Searching…';
+    btn.disabled = true;
+  });
+</script>
 {% endblock content %}

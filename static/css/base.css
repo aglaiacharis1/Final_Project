@@ -1,8 +1,3 @@
-/* ==========================================================================
-   Random Movie Picker — Bold & Playful theme
-   Signature: movie-ticket cards (torn-edge notches) + neobrutalist hard shadows
-   ========================================================================== */
-
 :root {
   --ink: #18122B;
   --cream: #FFF7E8;
@@ -91,6 +86,27 @@ a { color: var(--violet); }
   gap: 0.4rem;
 }
 
+/* Burger toggle — hidden on wide screens, shown once the nav would get cramped */
+.nav-toggler {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  order: 3;
+}
+.nav-toggler span {
+  display: block;
+  width: 100%;
+  height: 3px;
+  border-radius: 2px;
+  background: #fff;
+}
+
 .nav-links {
   display: flex;
   gap: 0.25rem;
@@ -98,6 +114,7 @@ a { color: var(--violet); }
   margin: 0;
   padding: 0;
   flex-wrap: wrap;
+  order: 4;
 }
 
 .nav-links a {
@@ -112,17 +129,93 @@ a { color: var(--violet); }
 
 .nav-links a:hover { background: rgba(255, 255, 255, 0.14); }
 
+.nav-links a.is-active {
+  background: var(--sunshine);
+  color: var(--ink);
+}
+
+/* Force the nav open on desktop regardless of Bootstrap's collapse state */
+@media (min-width: 721px) {
+  .nav-links.collapse { display: flex !important; }
+}
+
+@media (max-width: 720px) {
+  .nav-toggler { display: flex; }
+  .nav-links.collapse:not(.show) { display: none; }
+  .nav-links.collapse.show {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    order: 5;
+  }
+  .nav-links a { display: block; }
+}
+
+/* Quick search box in the navbar */
+.nav-search {
+  order: 2;
+  flex: 1;
+  min-width: 140px;
+  max-width: 260px;
+  margin: 0 0.5rem;
+}
+.nav-search input {
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.45rem 1rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+.nav-search input::placeholder { color: rgba(255, 255, 255, 0.6); }
+.nav-search input:focus {
+  outline: none;
+  border-color: var(--mint);
+  background: rgba(255, 255, 255, 0.14);
+}
+@media (max-width: 720px) {
+  .nav-search { order: 6; max-width: none; margin: 0.5rem 0 0; }
+}
+
 .nav-actions {
   display: flex;
   align-items: center;
   gap: 0.6rem;
   flex-wrap: wrap;
+  order: 1;
 }
 
 .nav-user {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nav-user__name {
   color: #fff;
   font-weight: 700;
   font-size: 0.95rem;
+}
+
+.user-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--sunshine);
+  color: var(--ink);
+  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+  border: 2px solid var(--ink);
+}
+
+@media (max-width: 480px) {
+  .nav-user__name { display: none; }
 }
 
 /* ---------- Buttons ---------- */
@@ -153,6 +246,12 @@ a { color: var(--violet); }
 .btn-pill:active {
   transform: translate(0, 0);
   box-shadow: 2px 2px 0 var(--ink);
+}
+
+.btn-pill:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-pill--primary { background: var(--hot-pink); color: #fff; }
@@ -333,19 +432,7 @@ a { color: var(--violet); }
 
 .auth-footer-link { margin-top: 1.5rem; text-align: center; font-weight: 600; }
 
-/* ---------- Movie reveal card (ready for when random-pick is wired up) ----------
-   Usage once a Movie object is available in context:
-
-   <div class="movie-reveal ticket-card">
-     <img src="{{ movie.poster.url }}" alt="{{ movie.title }} poster" class="movie-reveal__poster">
-     <div class="movie-reveal__details">
-       <span class="hero__eyebrow">Tonight's pick</span>
-       <h2>{{ movie.title }}</h2>
-       <p>{{ movie.description }}</p>
-       <a href="{% url 'home' %}" class="btn-pill">🎲 Pick another</a>
-     </div>
-   </div>
-------------------------------------------------------------------------- */
+/* ---------- Movie reveal card ---------- */
 .movie-reveal {
   display: flex;
   gap: 2rem;
@@ -368,6 +455,16 @@ a { color: var(--violet); }
 
 @media (max-width: 640px) {
   .movie-reveal { flex-direction: column; text-align: center; }
+}
+
+/* ---------- Poster placeholder (used whenever OMDb / a movie has no image) ---------- */
+.poster-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cream);
+  color: var(--muted);
+  font-size: 2.5rem;
 }
 
 /* ---------- Flash messages ---------- */
@@ -404,15 +501,19 @@ a { color: var(--violet); }
 /* ---------- Mood picker (radio "pills") ---------- */
 .mood-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 0.75rem;
   margin: 1.5rem 0;
 }
-.mood-option { position: relative; }
+.mood-option { position: relative; height: 100%; }
 .mood-option input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
 .mood-option label {
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  height: 100%;
+  min-height: 76px;
   border: 3px solid var(--ink);
   border-radius: var(--radius-sm);
   padding: 0.9rem 0.75rem;
@@ -455,7 +556,7 @@ a { color: var(--violet); }
   .filter-row { grid-template-columns: 1fr; }
 }
 
-/* ---------- Search input ---------- */
+/* ---------- Search input (in-page search form) ---------- */
 .search-bar {
   display: flex;
   gap: 0.75rem;

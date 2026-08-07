@@ -1,6 +1,7 @@
 # movies/urls.py
 
 from django.urls import path
+from . import views
 
 from .views import (
     AboutPageView,
@@ -22,4 +23,5 @@ urlpatterns = [
     path("movie/<str:imdb_id>/", movie_detail, name="movie_detail"),
     path("favorites/add/<str:imdb_id>/", add_favorite, name="add_favorite"),
     path("favorites/remove/<int:pk>/", remove_favorite, name="remove_favorite"),
+    path("reset/", views.reset_session, name="reset_session"),
 ]

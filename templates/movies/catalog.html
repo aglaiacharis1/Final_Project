@@ -13,12 +13,17 @@
       {% for movie in movies %}
         <div class="movie-card">
           {% if movie.poster %}
-            <img src="{{ movie.poster.url }}" alt="{{ movie.title }} poster" class="movie-card__poster">
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }} poster" class="movie-card__poster" loading="lazy">
+          {% else %}
+            <div class="movie-card__poster poster-placeholder" aria-hidden="true">🎬</div>
           {% endif %}
           <div class="movie-card__body">
             <h3>{{ movie.title }}</h3>
             <span style="color: var(--muted); font-weight: 600;">{{ movie.release_year }}</span>
             <p style="color: var(--muted); font-size: 0.9rem;">{{ movie.description|truncatewords:20 }}</p>
+            <div class="movie-card__actions">
+              <a href="{% url 'search' %}?q={{ movie.title|urlencode }}" class="btn-pill btn-pill--sm">🔍 Find on OMDb</a>
+            </div>
           </div>
         </div>
       {% endfor %}

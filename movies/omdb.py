@@ -1,5 +1,5 @@
 # movies/omdb.py
-"""Thin wrapper around the OMDb API."""
+
 import requests
 from django.conf import settings
 
@@ -17,16 +17,13 @@ def _get(params):
 
 
 def search_movies(query, page=1):
-    """Search by free-text title."""
     return _get({"s": query, "type": "movie", "page": page})
 
 
 def search_by_genre_year(genre, year):
-    """OMDb has no genre filter, so we search the genre as a keyword and
-    narrow by year, same trick the original prototype used."""
+ 
     return _get({"s": genre, "type": "movie", "y": year})
 
 
 def get_details(imdb_id):
-    """Full details (plot, rating, cast, etc.) for one title."""
     return _get({"i": imdb_id, "plot": "full"})

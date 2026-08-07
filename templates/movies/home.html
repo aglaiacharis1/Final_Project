@@ -25,8 +25,8 @@
     <div class="filter-row">
       <div class="filter-field">
         <label for="year_from">Year range: <span class="filter-value" id="year-display">{{ year_from }}–{{ year_to }}</span></label>
-        <input type="range" id="year_from" name="year_from" min="1970" max="2024" value="{{ year_from }}">
-        <input type="range" id="year_to" name="year_to" min="1970" max="2024" value="{{ year_to }}">
+        <input type="range" id="year_from" name="year_from" min="1970" max="2026" value="{{ year_from }}">
+        <input type="range" id="year_to" name="year_to" min="1970" max="2026" value="{{ year_to }}">
       </div>
       <div class="filter-field">
         <label for="min_rating">Min IMDb rating: <span class="filter-value" id="rating-display">{{ min_rating }}</span></label>
@@ -45,9 +45,11 @@
 </div>
 
 {% if last_found %}
-  <div class="movie-reveal ticket-card" style="margin-top: 2rem;">
+  <div class="movie-reveal ticket-card" style="margin-top: 2rem;" role="status" aria-live="polite">
     {% if last_found.Poster and last_found.Poster != "N/A" %}
-      <img src="{{ last_found.Poster }}" alt="{{ last_found.Title }} poster" class="movie-reveal__poster">
+      <img src="{{ last_found.Poster }}" alt="{{ last_found.Title }} poster" class="movie-reveal__poster" loading="lazy">
+    {% else %}
+      <div class="movie-reveal__poster poster-placeholder" aria-hidden="true">🎬</div>
     {% endif %}
     <div class="movie-reveal__details">
       <span class="hero__eyebrow">Tonight's pick</span>
@@ -85,6 +87,16 @@
   </div>
 {% endif %}
 
+{% if seen_count > 0 %}
+  <div class="ticket-card" style="margin-top: 2rem; text-align: center;">
+    <p style="color: var(--muted); margin-bottom: 1rem;">Seen everything worth seeing? Clear your session and start fresh.</p>
+    <form method="post" action="{% url 'reset_session' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn-pill btn-pill--outline" style="color: var(--ink); border-color: var(--ink);">🔄 Start Over</button>
+    </form>
+  </div>
+{% endif %}
+
 <script>
   const yearFrom = document.getElementById('year_from');
   const yearTo = document.getElementById('year_to');
@@ -93,6 +105,10 @@
   const ratingDisplay = document.getElementById('rating-display');
 
   function updateYearDisplay() {
+    // Keep the two handles from crossing over each other
+    if (parseInt(yearFrom.value, 10) > parseInt(yearTo.value, 10)) {
+      yearTo.value = yearFrom.value;
+    }
     yearDisplay.textContent = yearFrom.value + '–' + yearTo.value;
   }
   yearFrom.addEventListener('input', updateYearDisplay);

@@ -9,11 +9,10 @@ from django.views.generic import TemplateView
 from .models import Favorite, Movie
 from .omdb import get_details, search_by_genre_year, search_movies
 
-# key -> (label, OMDb genre keyword, badge css class)
+
 MOOD_MAP = {
     "laugh": ("I want to laugh 😂", "Comedy", "badge-comedy"),
     "thrill": ("I want a thrill 😱", "Horror", "badge-horror"),
-    "think": ("I want to think 🤔", "Drama", "badge-drama"),
     "adrenaline": ("I want some adrenaline 💥", "Action", "badge-action"),
     "fairytale": ("I want a fairytale 🦄", "Fantasy", "badge-fantasy"),
     "love": ("I want to fall in love 💕", "Romance", "badge-romance"),
@@ -31,13 +30,11 @@ def _favorite_ids(user):
 
 
 def home(request):
-    """Mood generator: pick a random movie matching genre/year/rating filters.
-    'Seen' titles and pick history live in the session, same idea as the
-    original Streamlit prototype's session_state."""
+    
     if request.method == "POST":
         mood_key = request.POST.get("mood", "laugh")
         year_from = int(request.POST.get("year_from", 2000))
-        year_to = int(request.POST.get("year_to", 2024))
+        year_to = int(request.POST.get("year_to", 2026))
         if year_from > year_to:
             year_from, year_to = year_to, year_from
         min_rating = float(request.POST.get("min_rating", 5.0))
@@ -95,7 +92,7 @@ def home(request):
         "genre": genre,
         "badge_class": badge_class,
         "year_from": request.session.get("year_from", 2000),
-        "year_to": request.session.get("year_to", 2024),
+        "year_to": request.session.get("year_to", 2026),
         "min_rating": request.session.get("min_rating", 5.0),
         "last_found": request.session.get("last_found"),
         "history": list(reversed(history[:-1])) if history else [],
@@ -103,6 +100,16 @@ def home(request):
         "favorite_ids": _favorite_ids(request.user),
     }
     return render(request, "movies/home.html", context)
+
+
+def reset_session(request):
+    """Clear the 'seen' history so every movie becomes pickable again."""
+    if request.method == "POST":
+        request.session["seen_ids"] = []
+        request.session["history"] = []
+        request.session["last_found"] = None
+        messages.info(request, "Session cleared — every movie is fair game again!")
+    return redirect("home")
 
 
 def search(request):
@@ -191,6 +198,5 @@ def favorites(request):
 
 
 def catalog(request):
-    """Browse movies curated locally via the admin (the Movie model)."""
     movies = Movie.objects.all().order_by("-release_year")
     return render(request, "movies/catalog.html", {"movies": movies})

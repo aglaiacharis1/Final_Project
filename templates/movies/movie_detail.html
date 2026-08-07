@@ -7,6 +7,8 @@
   <div class="movie-reveal ticket-card">
     {% if movie.Poster and movie.Poster != "N/A" %}
       <img src="{{ movie.Poster }}" alt="{{ movie.Title }} poster" class="movie-reveal__poster">
+    {% else %}
+      <div class="movie-reveal__poster poster-placeholder" aria-hidden="true">🎬</div>
     {% endif %}
     <div class="movie-reveal__details">
       <span class="hero__eyebrow">📋 Movie details</span>
